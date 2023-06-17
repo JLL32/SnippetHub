@@ -29,7 +29,7 @@ func main() {
 	if err != nil {
 		errorLog.Fatal(err)
 	}
-  infoLog.Print("Database connected")
+	infoLog.Print("Database connected")
 	defer db.Close()
 
 	app := &application{
