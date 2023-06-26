@@ -18,7 +18,7 @@ type application struct {
 	infoLog       *log.Logger
 	snippets      *models.SnippetModel
 	templateCache map[string]*template.Template
-	formDecoder  *form.Decoder
+	formDecoder   *form.Decoder
 }
 
 func main() {
@@ -46,7 +46,7 @@ func main() {
 		infoLog:       infoLog,
 		snippets:      &models.SnippetModel{DB: db},
 		templateCache: templateCache,
-		formDecoder:  form.NewDecoder(),
+		formDecoder:   form.NewDecoder(),
 	}
 
 	srv := &http.Server{

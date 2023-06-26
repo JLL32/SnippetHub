@@ -61,11 +61,7 @@ func (app *application) decodePostFrom(r *http.Request, dst any) error {
 		return err
 	}
 
-  fmt.Println("post form", r.PostForm)
-  fmt.Printf("type %T", dst)
 	err = app.formDecoder.Decode(dst, r.PostForm)
-  fmt.Println("dst", dst)
-
 	if err != nil {
 		var invalidDecodeError *form.InvalidDecoderError
 		if errors.As(err, &invalidDecodeError) {
