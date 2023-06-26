@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
-	"unicode/utf8"
 
 	"github.com/julienschmidt/httprouter"
 	"snippetbox.jll32.me/internal/models"
@@ -66,39 +64,28 @@ func (app *application) snippetCreateForm(w http.ResponseWriter, r *http.Request
 }
 
 func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
+	var form snippetCreateForm
+
+	err := app.decodePostFrom(r, &form)
+
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
 		return
-	}
-
-	title := r.PostForm.Get("title")
-	content := r.PostForm.Get("content")
-	expires, err := strconv.Atoi(r.PostForm.Get("expires"))
-	if err != nil {
-		app.clientError(w, http.StatusBadRequest)
-		return
-	}
-
-	form := snippetCreateForm{
-		Title:   r.PostForm.Get("title"),
-		Content: r.PostForm.Get("content"),
-		Expires: expires,
 	}
 
 	form.CheckField(validator.NotBlank(form.Title), "title", "this field cannot be blank")
 	form.CheckField(validator.MaxChars(form.Title, 100), "title", "this field cannot be more than 100 characters long")
 	form.CheckField(validator.NotBlank(form.Content), "content", "this field cannot be blank")
-	form.CheckField(validator.PermittedInt(form.Expires), "expires", "this field must equal 1, 7, 365")
+	form.CheckField(validator.PermittedInt(form.Expires, 1, 7, 365), "expires", "this field must equal 1, 7, 365")
 
-	if form.Valid() {
+	if !form.Valid() {
 		data := app.newTemplateData(r)
 		data.Form = form
 		app.render(w, http.StatusUnprocessableEntity, "create.tmpl", data)
 		return
 	}
 
-	id, err := app.snippets.Insert(title, content, expires)
+	id, err := app.snippets.Insert(form.Title, form.Content, form.Expires)
 	if err != nil {
 		app.serverError(w, err)
 		return
