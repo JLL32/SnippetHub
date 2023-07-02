@@ -11,13 +11,6 @@ import (
 	"snippetbox.jll32.me/internal/validator"
 )
 
-type snippetCreateForm struct {
-	Title               string `form:"title"`
-	Content             string `form:"content"`
-	Expires             int    `form:"expires"`
-	validator.Validator `form:"-"`
-}
-
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	snippets, err := app.snippets.Latest()
 	if err != nil {
@@ -53,6 +46,13 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 	data.Snippet = snippet
 
 	app.render(w, http.StatusOK, "view.tmpl", data)
+}
+
+type snippetCreateForm struct {
+	Title               string `form:"title"`
+	Content             string `form:"content"`
+	Expires             int    `form:"expires"`
+	validator.Validator `form:"-"`
 }
 
 func (app *application) snippetCreateForm(w http.ResponseWriter, r *http.Request) {
@@ -96,22 +96,32 @@ func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 	http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", id), http.StatusSeeOther)
 }
 
+type userSignupForm struct {
+	Name                string `form:"name"`
+	Email               string `form:"email"`
+	Password            string `form:"password"`
+	validator.Validator `form:"-"`
+}
+
 func (app *application) userSignupForm(w http.ResponseWriter, r *http.Request) {
-  fmt.Println(w, "Display an HTML form for signing up a new user...")
+	data := app.newTemplateData(r)
+	data.Form = userSignupForm{}
+
+  app.render(w, http.StatusOK, "signup.tmpl", data)
 }
 
 func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
-  fmt.Println(w, "Create a new user...")
+	fmt.Println(w, "Create a new user...")
 }
 
 func (app *application) userLoginForm(w http.ResponseWriter, r *http.Request) {
-  fmt.Println(w, "Display an HTML form for loggin in a user...")
+	fmt.Println(w, "Display an HTML form for loggin in a user...")
 }
 
 func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
-  fmt.Println(w, "Authenticate and login the user...")
+	fmt.Println(w, "Authenticate and login the user...")
 }
 
 func (app *application) userLogoutPost(w http.ResponseWriter, r *http.Request) {
-  fmt.Println(w, "Logout the user...")
+	fmt.Println(w, "Logout the user...")
 }
