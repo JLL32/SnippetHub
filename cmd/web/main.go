@@ -42,7 +42,7 @@ func main() {
 	infoLog.Print("Database connected")
 	defer db.Close()
 
-	templateCache, err := newTemplateCache()
+	// templateCache, err := newTemplateCache()
 	if err != nil {
 		errorLog.Fatal(err)
 	}
@@ -57,7 +57,7 @@ func main() {
 		infoLog:        infoLog,
 		snippets:       &models.SnippetModel{DB: db},
 		users:          &models.UserModel{DB: db},
-		templateCache:  templateCache,
+		templateCache:  nil,
 		formDecoder:    form.NewDecoder(),
 		sessionManager: sessionManager,
 	}

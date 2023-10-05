@@ -7,8 +7,10 @@ import (
 	"strconv"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/justinas/nosurf"
 	"snippetbox.jll32.me/internal/models"
 	"snippetbox.jll32.me/internal/validator"
+	ui "snippetbox.jll32.me/ui/html"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -20,7 +22,9 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
 	data := app.newTemplateData(r)
 	data.Snippets = snippets
-	app.render(w, http.StatusOK, "home.tmpl", data)
+	// app.render(w, http.StatusOK, "home.tmpl", data)
+
+	ui.Layout("Snippets", nil, ui.Nav(app.isAuthenticated(r), nosurf.Token(r)), ui.Home(snippets)).Render(r.Context(), w)
 }
 
 func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
@@ -45,7 +49,8 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 	data := app.newTemplateData(r)
 	data.Snippet = snippet
 
-	app.render(w, http.StatusOK, "view.tmpl", data)
+	// app.render(w, http.StatusOK, "view.tmpl", data)
+	ui.Layout("snippet - #"+strconv.Itoa(id), nil, ui.Nav(app.isAuthenticated(r), nosurf.Token(r)), ui.View(snippet)).Render(r.Context(), w)
 }
 
 type snippetCreateForm struct {
