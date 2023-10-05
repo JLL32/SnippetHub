@@ -1,0 +1,24 @@
+package pages
+
+import "fmt"
+
+import "snippetbox.jll32.me/internal/models"
+import 	. "snippetbox.jll32.me/ui/html/partials"
+import 	. "snippetbox.jll32.me/ui/html/layout"
+import  . "snippetbox.jll32.me/ui/html/utils"
+
+templ View(snippet *models.Snippet, flash string, isAuthenticated bool, CSRFToken string) {
+  @Layout("Snippet #" + fmt.Sprint(snippet.ID), flash, Nav(isAuthenticated, CSRFToken)) {
+    <div class="snippet">
+      <div class="metadata">
+        <strong>{snippet.Title}</strong>
+        <span>#{fmt.Sprint(snippet.ID)}</span>
+      </div>
+      <pre><code>{snippet.Content}</code></pre>
+      <div class="metadata">
+        <time>Created: {HumanDate(snippet.Created)}</time>
+        <time>Expires: {HumanDate(snippet.Expires)}</time>
+      </div>
+    </div>
+  }
+}

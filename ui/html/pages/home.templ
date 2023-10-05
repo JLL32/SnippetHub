@@ -1,0 +1,31 @@
+package pages
+
+import "fmt"
+import "snippetbox.jll32.me/internal/models"
+import 	. "snippetbox.jll32.me/ui/html/partials"
+import 	. "snippetbox.jll32.me/ui/html/layout"
+import  . "snippetbox.jll32.me/ui/html/utils"
+
+templ Home(snippets []*models.Snippet, flash string, isAuthenticated bool, CSRFToken string) {
+  @Layout("Home", flash, Nav(isAuthenticated, CSRFToken)) {
+    <h2>Latest Snippets</h2>
+    if len(snippets) > 0 {
+      <table>
+        <tr>
+          <th>Title</th>
+          <th>Created</th>
+          <th>ID</th>
+        </tr>
+      for _, snippet := range snippets {
+        <tr>
+          <td><a href={templ.URL(fmt.Sprintf("/snippet/view/%d", snippet.ID))}>{snippet.Title}</a></td>
+          <td>{HumanDate(snippet.Created)}</td>
+          <td>#{fmt.Sprint(snippet.ID) + "\t"}</td>
+        </tr>
+      }
+      </table>
+    } else {
+      <p>There"s nothing to see here.. yet!</p>
+    }
+  }
+}

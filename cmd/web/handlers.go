@@ -10,7 +10,8 @@ import (
 	"github.com/justinas/nosurf"
 	"snippetbox.jll32.me/internal/models"
 	"snippetbox.jll32.me/internal/validator"
-	ui "snippetbox.jll32.me/ui/html"
+	"snippetbox.jll32.me/ui/html/forms"
+	"snippetbox.jll32.me/ui/html/pages"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -22,9 +23,8 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
 	data := app.newTemplateData(r)
 	data.Snippets = snippets
-	// app.render(w, http.StatusOK, "home.tmpl", data)
 
-	ui.Layout("Snippets", nil, ui.Nav(app.isAuthenticated(r), nosurf.Token(r)), ui.Home(snippets)).Render(r.Context(), w)
+	pages.Home(snippets, "", app.isAuthenticated(r), nosurf.Token(r)).Render(r.Context(), w)
 }
 
 func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
@@ -49,8 +49,7 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 	data := app.newTemplateData(r)
 	data.Snippet = snippet
 
-	// app.render(w, http.StatusOK, "view.tmpl", data)
-	ui.Layout("snippet - #"+strconv.Itoa(id), nil, ui.Nav(app.isAuthenticated(r), nosurf.Token(r)), ui.View(snippet)).Render(r.Context(), w)
+	pages.View(snippet, "", app.isAuthenticated(r), nosurf.Token(r)).Render(r.Context(), w)
 }
 
 type snippetCreateForm struct {
@@ -101,22 +100,12 @@ func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 	http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", id), http.StatusSeeOther)
 }
 
-type userSignupForm struct {
-	Name                string `form:"name"`
-	Email               string `form:"email"`
-	Password            string `form:"password"`
-	validator.Validator `form:"-"`
-}
-
 func (app *application) userSignupForm(w http.ResponseWriter, r *http.Request) {
-	data := app.newTemplateData(r)
-	data.Form = userSignupForm{}
-
-	app.render(w, http.StatusOK, "signup.tmpl", data)
+	pages.Signup(forms.UserSignupForm{}, "", app.isAuthenticated(r), nosurf.Token(r)).Render(r.Context(), w)
 }
 
 func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
-	var form userSignupForm
+	var form forms.UserSignupForm
 
 	err := app.decodePostFrom(r, &form)
 	if err != nil {
@@ -131,9 +120,7 @@ func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
 	form.CheckField(validator.MinChars(form.Password, 8), "password", "this field must be at least 8 characters long")
 
 	if !form.Valid() {
-		data := app.newTemplateData(r)
-		data.Form = form
-		app.render(w, http.StatusUnprocessableEntity, "signup.tmpl", data)
+		pages.Signup(form, "", app.isAuthenticated(r), nosurf.Token(r)).Render(r.Context(), w)
 		return
 	}
 
@@ -141,10 +128,7 @@ func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if errors.Is(err, models.ErrDuplicateEmail) {
 			form.AddFieldError("email", "Email address is already in use")
-
-			data := app.newTemplateData(r)
-			data.Form = form
-			app.render(w, http.StatusUnprocessableEntity, "signup.tmpl", data)
+			pages.Signup(form, "", app.isAuthenticated(r), nosurf.Token(r)).Render(r.Context(), w)
 		} else {
 			app.serverError(w, err)
 		}

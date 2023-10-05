@@ -1,8 +1,10 @@
-package ui
+package utils
 
-import "time"
+import (
+	"time"
+)
 
-func humanDate(t time.Time) string {
+func HumanDate(t time.Time) string {
 	if t.IsZero() {
 		return ""
 	}

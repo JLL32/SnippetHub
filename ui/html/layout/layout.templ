@@ -1,9 +1,9 @@
-package ui
+package layout
 
 import "time"
 import "fmt"
 
-templ Layout(title string, flash *string, nav, main templ.Component) {
+templ Layout(title string, flash string, nav templ.Component) {
 <!doctype html>
 <html lang="en">
   <head>
@@ -19,10 +19,10 @@ templ Layout(title string, flash *string, nav, main templ.Component) {
     </header>
     {! nav}
     <main>
-      if flash != nil {
-        <div class="flash">{*flash}</div>
+      if flash != "" {
+        <div class="flash">{flash}</div>
       }
-      {! main}
+      { children... }
     </main>
     <footer>
       Powered by <a href="https://golang.org/">Go</a> in {fmt.Sprint(time.Now().Year())}
