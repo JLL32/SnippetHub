@@ -13,7 +13,7 @@ templ renderFieldError(FieldErrors map[string]string, fieldName string) {
 templ Signup(form UserSignupForm, flash string, isAuthenticated bool, CSRFToken string) {
   @Layout("Signup", flash, Nav(isAuthenticated, CSRFToken)) {
     <form action="/user/signup" method="POST" novalidate>
-      <input type="hidden" name="csrf_token" value="{{.CSRFToken}}"/>
+      <input type="hidden" name="csrf_token" value={CSRFToken}/>
       <div>
         <label>Name:</label>
         @renderFieldError(form.FieldErrors, "name")
