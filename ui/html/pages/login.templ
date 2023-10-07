@@ -1,0 +1,30 @@
+package pages
+
+import 	. "snippetbox.jll32.me/ui/html/partials"
+import 	. "snippetbox.jll32.me/ui/html/layout"
+import 	. "snippetbox.jll32.me/ui/html/forms"
+
+templ Login(form UserLoginForm, flash string, isAuthenticated bool, CSRFToken string) {
+    @Layout("Signup", flash, Nav(isAuthenticated, CSRFToken)) {
+        <form action="/user/login" method="POST" novalidate>
+            <input type="hidden" name="csrf_token" value={CSRFToken}/>
+            <!-- Notice that here we are looping over the NonFieldErrors and displaying them, if any exist -->
+            for _, error := range form.NonFieldErrors {
+                <div class="error">{error}</div>
+            }
+            <div>
+                <label>Email:</label>
+                @RenderFieldError(form.FieldErrors, "email")
+                <input type="email" name="email" value={form.Email}/>
+            </div>
+            <div>
+                <label>Password:</label>
+                @RenderFieldError(form.FieldErrors, "password")
+                <input type="password" name="password"/>
+            </div>
+            <div>
+                <input type="submit" value="Login"/>
+            </div>
+        </form>
+    }
+}

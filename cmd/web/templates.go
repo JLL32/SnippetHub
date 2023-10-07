@@ -6,15 +6,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"snippetbox.jll32.me/internal/models"
 	"snippetbox.jll32.me/ui"
 )
 
-type templateData struct {
-	Snippet         *models.Snippet
-	Snippets        []*models.Snippet
-	CurrentYear     int
-	Form            any
+type ContextData struct {
 	Flash           string
 	IsAuthenticated bool
 	CSRFToken       string

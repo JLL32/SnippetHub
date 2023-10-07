@@ -4,29 +4,23 @@ import 	. "snippetbox.jll32.me/ui/html/partials"
 import 	. "snippetbox.jll32.me/ui/html/layout"
 import 	. "snippetbox.jll32.me/ui/html/forms"
 
-templ renderFieldError(FieldErrors map[string]string, fieldName string) {
-  if _, ok := FieldErrors[fieldName]; ok {
-    <label class="error">{FieldErrors[fieldName]}</label>
-  }
-}
-
 templ Signup(form UserSignupForm, flash string, isAuthenticated bool, CSRFToken string) {
   @Layout("Signup", flash, Nav(isAuthenticated, CSRFToken)) {
     <form action="/user/signup" method="POST" novalidate>
       <input type="hidden" name="csrf_token" value={CSRFToken}/>
       <div>
         <label>Name:</label>
-        @renderFieldError(form.FieldErrors, "name")
+        @RenderFieldError(form.FieldErrors, "name")
         <input type="text" name="name" value={form.Name} />
       </div>
       <div>
         <label>Email:</label>
-        @renderFieldError(form.FieldErrors, "email")
+        @RenderFieldError(form.FieldErrors, "email")
         <input type="email" name="email" value={form.Email} />
       </div>
       <div>
         <label>Password:</label>
-        @renderFieldError(form.FieldErrors, "password")
+        @RenderFieldError(form.FieldErrors, "password")
         <input type="password" name="password" />
       </div>
       <div>

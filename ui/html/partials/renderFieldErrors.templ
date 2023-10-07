@@ -1,0 +1,7 @@
+package partials
+
+templ RenderFieldError(FieldErrors map[string]string, fieldName string) {
+  if _, ok := FieldErrors[fieldName]; ok {
+    <label class="error">{FieldErrors[fieldName]}</label>
+  }
+}

@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/justinas/nosurf"
 	"snippetbox.jll32.me/internal/models"
 	"snippetbox.jll32.me/internal/validator"
 	"snippetbox.jll32.me/ui/html/forms"
@@ -21,10 +20,9 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := app.newTemplateData(r)
-	data.Snippets = snippets
-
-	pages.Home(snippets, "", app.isAuthenticated(r), nosurf.Token(r)).Render(r.Context(), w)
+	w.WriteHeader(http.StatusAccepted)
+	contextData := app.newContextData(r)
+	pages.Home(snippets, contextData.Flash, contextData.IsAuthenticated, contextData.CSRFToken).Render(r.Context(), w)
 }
 
 func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
@@ -46,30 +44,23 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := app.newTemplateData(r)
-	data.Snippet = snippet
-
-	pages.View(snippet, "", app.isAuthenticated(r), nosurf.Token(r)).Render(r.Context(), w)
-}
-
-type snippetCreateForm struct {
-	Title               string `form:"title"`
-	Content             string `form:"content"`
-	Expires             int    `form:"expires"`
-	validator.Validator `form:"-"`
+	w.WriteHeader(http.StatusAccepted)
+	contextData := app.newContextData(r)
+	pages.View(snippet, contextData.Flash, contextData.IsAuthenticated, contextData.CSRFToken).Render(r.Context(), w)
 }
 
 func (app *application) snippetCreateForm(w http.ResponseWriter, r *http.Request) {
-	data := app.newTemplateData(r)
-	data.Form = snippetCreateForm{
+	form := forms.SnippetCreateForm{
 		Expires: 365,
 	}
 
-	app.render(w, http.StatusOK, "create.tmpl", data)
+	w.WriteHeader(http.StatusAccepted)
+	contextData := app.newContextData(r)
+	pages.Create(form, contextData.Flash, contextData.IsAuthenticated, contextData.CSRFToken).Render(r.Context(), w)
 }
 
 func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request) {
-	var form snippetCreateForm
+	var form forms.SnippetCreateForm
 
 	err := app.decodePostFrom(r, &form)
 	if err != nil {
@@ -83,9 +74,9 @@ func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 	form.CheckField(validator.PermittedValue(form.Expires, 1, 7, 365), "expires", "this field must equal 1, 7, 365")
 
 	if !form.Valid() {
-		data := app.newTemplateData(r)
-		data.Form = form
-		app.render(w, http.StatusUnprocessableEntity, "create.tmpl", data)
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		contextData := app.newContextData(r)
+		pages.Create(form, contextData.Flash, contextData.IsAuthenticated, contextData.CSRFToken).Render(r.Context(), w)
 		return
 	}
 
@@ -101,7 +92,9 @@ func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 }
 
 func (app *application) userSignupForm(w http.ResponseWriter, r *http.Request) {
-	pages.Signup(forms.UserSignupForm{}, "", app.isAuthenticated(r), nosurf.Token(r)).Render(r.Context(), w)
+	w.WriteHeader(http.StatusAccepted)
+	contextData := app.newContextData(r)
+	pages.Signup(forms.UserSignupForm{}, contextData.Flash, contextData.IsAuthenticated, contextData.CSRFToken).Render(r.Context(), w)
 }
 
 func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
@@ -120,7 +113,9 @@ func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
 	form.CheckField(validator.MinChars(form.Password, 8), "password", "this field must be at least 8 characters long")
 
 	if !form.Valid() {
-		pages.Signup(form, "", app.isAuthenticated(r), nosurf.Token(r)).Render(r.Context(), w)
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		contextData := app.newContextData(r)
+		pages.Signup(form, contextData.Flash, contextData.IsAuthenticated, contextData.CSRFToken).Render(r.Context(), w)
 		return
 	}
 
@@ -128,7 +123,10 @@ func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if errors.Is(err, models.ErrDuplicateEmail) {
 			form.AddFieldError("email", "Email address is already in use")
-			pages.Signup(form, "", app.isAuthenticated(r), nosurf.Token(r)).Render(r.Context(), w)
+
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			contextData := app.newContextData(r)
+			pages.Signup(form, contextData.Flash, contextData.IsAuthenticated, contextData.CSRFToken).Render(r.Context(), w)
 		} else {
 			app.serverError(w, err)
 		}
@@ -141,20 +139,14 @@ func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/user/login", http.StatusSeeOther)
 }
 
-type userLoginForm struct {
-	Email               string `form:"email"`
-	Password            string `form:"password"`
-	validator.Validator `form:"-"`
-}
-
 func (app *application) userLoginForm(w http.ResponseWriter, r *http.Request) {
-	data := app.newTemplateData(r)
-	data.Form = userLoginForm{}
-	app.render(w, http.StatusOK, "login.tmpl", data)
+	w.WriteHeader(http.StatusAccepted)
+	contextData := app.newContextData(r)
+	pages.Login(forms.UserLoginForm{}, contextData.Flash, contextData.IsAuthenticated, contextData.CSRFToken).Render(r.Context(), w)
 }
 
 func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
-	var form userLoginForm
+	var form forms.UserLoginForm
 
 	err := app.decodePostFrom(r, &form)
 	if err != nil {
@@ -167,9 +159,10 @@ func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 	form.CheckField(validator.NotBlank(form.Password), "password", "This field cannot be blank")
 
 	if !form.Valid() {
-		data := app.newTemplateData(r)
-		data.Form = form
-		app.render(w, http.StatusUnprocessableEntity, "login.tmpl", data)
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		contextData := app.newContextData(r)
+		pages.Login(form, contextData.Flash, contextData.IsAuthenticated, contextData.CSRFToken).Render(r.Context(), w)
+		return
 	}
 
 	id, err := app.users.Authenticate(form.Email, form.Password)
@@ -177,9 +170,9 @@ func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err, models.ErrInvalidCredentials) {
 			form.AddNonFieldError("Email or password is incorrect")
 
-			data := app.newTemplateData(r)
-			data.Form = form
-			app.render(w, http.StatusUnprocessableEntity, "login.tmpl", data)
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			contextData := app.newContextData(r)
+			pages.Login(form, contextData.Flash, contextData.IsAuthenticated, contextData.CSRFToken).Render(r.Context(), w)
 		} else {
 			app.serverError(w, err)
 		}
@@ -206,7 +199,7 @@ func (app *application) userLogoutPost(w http.ResponseWriter, r *http.Request) {
 
 	app.sessionManager.Remove(r.Context(), "authenticatedUserID")
 
-	app.sessionManager.Put(r.Context(), "flash", "You've been loged out successfully!")
+	app.sessionManager.Put(r.Context(), "flash", "You've been logged out successfully!")
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

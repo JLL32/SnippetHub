@@ -1,0 +1,43 @@
+package pages
+
+import "fmt"
+
+import 	. "snippetbox.jll32.me/ui/html/partials"
+import 	. "snippetbox.jll32.me/ui/html/layout"
+import 	. "snippetbox.jll32.me/ui/html/forms"
+
+templ Create(form SnippetCreateForm, flash string, isAuthenticated bool, CSRFToken string) {
+  @Layout("Create New Snippet", flash, Nav(isAuthenticated, CSRFToken)) {
+    <form action="/snippet/create" method="POST">
+      <input type="hidden" name="csrf_token" value={CSRFToken}/>
+      <div>
+        <label>Title:</label>
+          @RenderFieldError(form.FieldErrors, "title")
+        <input type="text" name="title" value={form.Title}/>
+      </div>
+      <div>
+        <label>Content:</label>
+          @RenderFieldError(form.FieldErrors, "content")
+        <textarea name="content">{form.Content}</textarea>
+      </div>
+      <div>
+        <label>Delete in:</label>
+          @RenderFieldError(form.FieldErrors, "expires")
+          @renderExpires(365, form.Expires) One Year
+          @renderExpires(7, form.Expires) one Week
+          @renderExpires(1, form.Expires) One Day
+      </div>
+      <div>
+        <input type="submit" value="Publish snippet"/>
+      </div>
+    </form>
+  }
+}
+
+templ renderExpires(value int, expires int) {
+      <input type="radio" name="expires" value={fmt.Sprint(value)}
+        if expires == value {
+          checked
+        }
+      />
+}
