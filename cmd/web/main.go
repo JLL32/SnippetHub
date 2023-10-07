@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"database/sql"
 	"flag"
-	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -22,7 +21,6 @@ type application struct {
 	infoLog        *log.Logger
 	snippets       models.SnippetModelInterFace
 	users          models.UserModelInterface
-	templateCache  map[string]*template.Template
 	formDecoder    *form.Decoder
 	sessionManager *scs.SessionManager
 }
@@ -57,7 +55,6 @@ func main() {
 		infoLog:        infoLog,
 		snippets:       &models.SnippetModel{DB: db},
 		users:          &models.UserModel{DB: db},
-		templateCache:  nil,
 		formDecoder:    form.NewDecoder(),
 		sessionManager: sessionManager,
 	}

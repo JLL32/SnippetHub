@@ -20,11 +20,6 @@ import (
 )
 
 func newTestApplication(t *testing.T) *application {
-	templateCache, err := newTemplateCache()
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	formDecoder := form.NewDecoder()
 
 	sessionManager := scs.New()
@@ -36,7 +31,6 @@ func newTestApplication(t *testing.T) *application {
 		infoLog:        log.New(io.Discard, "", 0),
 		snippets:       &mocks.SnippetModel{},
 		users:          &models.UserModel{},
-		templateCache:  templateCache,
 		formDecoder:    formDecoder,
 		sessionManager: sessionManager,
 	}

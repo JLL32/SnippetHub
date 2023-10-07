@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"snippetbox.jll32.me/internal/assert"
+	"snippetbox.jll32.me/ui/html/utils"
 )
 
 func TestHumanDate(t *testing.T) {
@@ -32,7 +33,7 @@ func TestHumanDate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			hd := humanDate(tt.tm)
+			hd := utils.HumanDate(tt.tm)
 
 			assert.Equal(t, hd, tt.want)
 		})
